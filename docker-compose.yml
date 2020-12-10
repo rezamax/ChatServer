@@ -1,0 +1,18 @@
+version: "3.2"
+
+services: 
+  app:
+     build: 
+       context: .
+     ports: 
+       - "8580:8080"
+     restart: always
+     networks:
+      - back-end
+     volumes: 
+      - .:/app
+     command: tail -F anything
+networks:
+  back-end:
+    driver: bridge
+      
