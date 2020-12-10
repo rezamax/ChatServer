@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -14,11 +15,11 @@ var upgrader = websocket.Upgrader{
 }
 
 type Client struct {
-	name       string
+	name       int
 	connection *websocket.Conn
 }
 
-func NewClient(name string, conn *websocket.Conn) *Client {
+func NewClient(name int, conn *websocket.Conn) *Client {
 	client := &Client{
 		name:       name,
 		connection: conn,
@@ -41,10 +42,9 @@ func wsServer(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	client := NewClient("reza", ws)
+	client := NewClient(rand.Intn(100), ws)
 	fmt.Println(client)
 	client.Reader()
-	//reader(ws)
 }
 
 func (client *Client) Reader() {
@@ -55,7 +55,7 @@ func (client *Client) Reader() {
 			log.Println(err)
 			return
 		}
-		fmt.Printf("%s:%s", client.name, string(p))
+		fmt.Printf("user --> %d:%s \n", client.name, string(p))
 	}
 }
 
@@ -64,7 +64,7 @@ func writer() {
 }
 
 func router() {
-	http.HandleFunc("/server", wsServer)
+	http.HandleFunc("/", wsServer)
 }
 
 func main() {
