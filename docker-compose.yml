@@ -7,11 +7,19 @@ services:
      ports: 
        - "8580:8080"
      restart: always
+     links: 
+      - redis
      networks:
       - back-end
      volumes: 
       - .:/app
      command: tail -F anything
+  redis:
+    image: redis:3-alpine
+    ports: 
+      - 6370:6379
+    networks: 
+      - back-end
 networks:
   back-end:
     driver: bridge

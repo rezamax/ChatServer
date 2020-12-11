@@ -14,6 +14,7 @@ RUN apk update && apk upgrade && \
     apk add --no-cache bash git openssh
 RUN go get github.com/gorilla/websocket
 RUN go get -u github.com/gorilla/mux
+RUN go get github.com/go-redis/redis
 
 
 

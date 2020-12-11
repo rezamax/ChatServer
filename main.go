@@ -9,6 +9,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+var clientMap = map[int]*Client{}
+
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -17,22 +19,6 @@ var upgrader = websocket.Upgrader{
 type Client struct {
 	name       int
 	connection *websocket.Conn
-}
-
-type ChatRoom struct {
-	clients []*Client
-}
-
-func (chatroom *ChatRoom) Join(name int, conn *websocket.Conn) {
-	client := NewClient(rand.Intn(100), conn)
-	chatroom.clients = append(chatroom.clients, client)
-}
-
-func NewChatRoom() *ChatRoom {
-	chatroom := &ChatRoom{
-		clients: make([]*Client, 0),
-	}
-	return chatroom
 }
 
 func NewClient(name int, conn *websocket.Conn) *Client {
@@ -59,16 +45,16 @@ func wsServer(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
-	chatroom := NewChatRoom()
-	chatroom.Join(rand.Intn(100), ws)
-
-	client := NewClient(rand.Intn(100), ws)
+	rnN := rand.Intn(100)
+	client := NewClient(rnN, ws)
+	clientMap[rnN] = client
+	fmt.Println(clientMap)
 	fmt.Println(client)
-	client.Reader(chatroom)
+	client.Reader()
 
 }
 
-func (client *Client) Reader(chatroom *ChatRoom) {
+func (client *Client) Reader() {
 	for {
 		_, p, err := client.connection.ReadMessage()
 		if err != nil {
@@ -77,8 +63,10 @@ func (client *Client) Reader(chatroom *ChatRoom) {
 			return
 		}
 		fmt.Printf("user_%d:%s \n", client.name, string(p))
-		for _, c := range chatroom.clients {
-			c.Writer(string(p), client.name)
+		for k, c := range clientMap {
+			if k != client.name {
+				c.Writer(string(p), client.name)
+			}
 		}
 	}
 }
