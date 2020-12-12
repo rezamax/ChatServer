@@ -30,7 +30,7 @@ func NewClient(name int, conn *websocket.Conn) *Client {
 	return client
 }
 
-func wsServer(w http.ResponseWriter, r *http.Request) {
+func WsServer(w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool {
 		return true
 	}
@@ -40,7 +40,7 @@ func wsServer(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("Client Connected...")
 
-	err = ws.WriteMessage(1, []byte("Hi Client!"))
+	err = ws.WriteMessage(1, []byte("Start Chat!"))
 	if err != nil {
 		log.Println(err)
 	}
@@ -76,8 +76,13 @@ func (client *Client) Writer(msg string, writer int) {
 	client.connection.WriteMessage(1, []byte(wn))
 }
 
+func CreateChatGroup(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello world!")
+}
+
 func router() {
-	http.HandleFunc("/", wsServer)
+	http.HandleFunc("/", WsServer)
+	http.HandleFunc("/CreateChatGroup", CreateChatGroup)
 }
 
 func main() {

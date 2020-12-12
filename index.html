@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {
+  margin: 0 auto;
+  max-width: 800px;
+  padding: 0 20px;
+}
+
+.container {
+  border: 2px solid #dedede;
+  background-color: #f1f1f1;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+.darker {
+  border-color: #ccc;
+  background-color: #ddd;
+}
+
+.container::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.container img {
+  float: left;
+  max-width: 60px;
+  width: 100%;
+  margin-right: 20px;
+  border-radius: 50%;
+}
+
+.container img.right {
+  float: right;
+  margin-left: 20px;
+  margin-right:0;
+}
+
+.time-right {
+  float: right;
+  color: #aaa;
+}
+
+.time-left {
+  float: left;
+  color: #999;
+}
+</style>
+</head>
+<body>
+
+<h2>Chat Messages</h2>
+
+<ul id="chat"></ul>
+
+<form class="container">
+    <textarea rows="8" cols="60" id="message"></textarea>
+    <br />
+    <button type="submit">Send</button>
+</form>
+
+<script>
+    const connection = new WebSocket('ws://127.0.0.1:8580');
+    connection.onopen = () => {
+    console.log('connected');
+    };
+
+    connection.onclose = () => {
+    console.error('disconnected');
+    };
+
+    connection.onerror = error => {
+    console.error('failed to connect', error);
+    };
+
+    connection.onmessage = event => {
+    console.log('received', event.data);
+    let li = document.createElement('li');
+    li.className = "container"
+    li.innerText = event.data;
+    document.querySelector('#chat').append(li);
+    };
+
+    document.querySelector('form').addEventListener('submit', event => {
+    event.preventDefault();
+    let message = document.querySelector('#message').value;
+    let chat_li = document.createElement('li');
+    chat_li.className = "container darker"
+    chat_li.dir = "rtl"
+    chat_li.innerText = message;
+    document.querySelector('#chat').append(chat_li);
+    connection.send(message);
+    document.querySelector('#message').value = '';
+    });
+</script>
+
+</body>
+</html>
